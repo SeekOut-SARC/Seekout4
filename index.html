@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Location-Based Hint</title>
+    <style>
+        body {
+            background-color: black;
+            color: white;
+            font-family: Arial, sans-serif;
+            text-align: center;
+            margin-top: 50px;
+        }
+        h1 {
+            font-size: 2.5em;
+            margin-bottom: 20px;
+        }
+        p {
+            font-size: 1.2em;
+        }
+        footer {
+            margin-top: 50px;
+            font-size: 1em;
+            color: gray;
+        }
+        a {
+            color: #00ff00;
+            text-decoration: none;
+            font-weight: bold;
+        }
+        a:hover {
+            text-decoration: underline;
+        }
+    </style>
+</head>
+<body>
+    <h1>Verify Your Location and Previous Hint</h1>
+    <p id="status">Checking your location...</p>
+    <p id="hint" style="font-weight: bold; font-size: 20px;"></p>
+
+    <script>
+        // Target location (latitude and longitude)
+        const targetLatitude = 19.131746465895375; // Updated Latitude
+        const targetLongitude = 72.91376358650916; // Updated Longitude
+        const thresholdDistance = 0.1; // Distance threshold in kilometers (50 meters)
+
+        // Previous hint to verify
+        const correctPreviousHint = "213POV";
+
+        // Function to calculate the distance between two coordinates
+        function getDistance(lat1, lon1, lat2, lon2) {
+            const toRad = (value) => (value * Math.PI) / 180;
+            const R = 6371; // Earth's radius in kilometers
+            const dLat = toRad(lat2 - lat1);
+            const dLon = toRad(lon2 - lon1);
+            const a =
+                Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+                Math.cos(toRad(lat1)) * Math.cos(toRad(lat2)) *
+                Math.sin(dLon / 2) * Math.sin(dLon / 2);
+            const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+            return R * c; // Distance in kilometers
+        }
+
+        // Prompt user for their previous hint
+        const userPreviousHint = prompt("ENTER YOUR PREVIOUS HINT CODE:");
+
+        if (userPreviousHint === correctPreviousHint) {
+            if (navigator.geolocation) {
+                navigator.geolocation.getCurrentPosition(
+                    (position) => {
+                        const userLatitude = position.coords.latitude;
+                        const userLongitude = position.coords.longitude;
+                        const distance = getDistance(userLatitude, userLongitude, targetLatitude, targetLongitude);
+
+                        if (distance <= thresholdDistance) {
+                            document.getElementById("status").innerText = "Location matched!";
+                            document.getElementById("hint").innerHTML = "🎉 YOUR TASK:<br>Click on the link below:<br><a href='https://seekout.sarc-iitb.org/OfflineTokenChecker/dfaa4f97-d5a8-442d-92c4-f99a35bc92ad' target='_blank'>LINK TO WIN";
+                        } else {
+                            document.getElementById("status").innerText = "Location mismatch!";
+                            document.getElementById("hint").innerText = "❌ You are not at the correct location. Please try again.";
+                        }
+                    },
+                    (error) => {
+                        document.getElementById("status").innerText = "Unable to get your location. Please enable GPS and try again.";
+                    }
+                );
+            } else {
+                document.getElementById("status").innerText = "Geolocation is not supported by your browser.";
+            }
+        } else {
+            document.getElementById("status").innerText = "Incorrect previous hint!";
+            document.getElementById("hint").innerText = "❌ Please check your previous hint and try again.";
+        }
+    </script>
+
+    <footer>
+        Designed with ❤️ by SARC team :)
+    </footer>
+</body>
+</html>
